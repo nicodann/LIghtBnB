@@ -4,7 +4,7 @@ CREATE DATABASE lightbnb;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
 DROP TABLE IF EXISTS reservations CASCADE;
-DROP TABLE IF EXISTS property_reviews CASCADE;
+DROP TABLE IF EXISTS property_review CASCADE;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY NOT NULL,
@@ -19,10 +19,10 @@ CREATE TABLE properties (
   
   title VARCHAR(255),
   description TEXT,
-  pic_thumb_url VARCHAR(255),
-  pic_cover_url VARCHAR(255),
+  thumbnail_photo_url VARCHAR(255),
+  cover_photo_url VARCHAR(255),
   cost_per_night INTEGER NOT NULL DEFAULT 0,
-  parking_spaces INTEGER NOT NULL DEFAULT 0,
+  parking_space INTEGER NOT NULL DEFAULT 0,
   number_of_bathrooms INTEGER NOT NULL DEFAULT 0,
   number_of_bedrooms INTEGER NOT NULL DEFAULT 0,
   
@@ -30,7 +30,7 @@ CREATE TABLE properties (
   street VARCHAR(255) NOT NULL,
   city VARCHAR(255) NOT NULL,
   province VARCHAR(255) NOT NULL,
-  postal_code VARCHAR(255) NOT NULL,
+  post_code VARCHAR(255) NOT NULL,
   
   active BOOLEAN NOT NULL DEFAULT TRUE
 );
@@ -43,7 +43,7 @@ CREATE TABLE reservations (
   guest_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE property_reviews (
+CREATE TABLE property_review (
   id SERIAL PRIMARY KEY NOT NULL,
   guest_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
