@@ -1,5 +1,3 @@
-// const properties = require('./json/properties.json');
-// const users = require('./json/users.json');
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -8,6 +6,7 @@ const pool = new Pool({
   host: 'localhost',
   database: 'lightbnb'
 });
+
 
 
 /// Users
@@ -101,13 +100,9 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 
-const generateQueryString = () => {
-
-}
-
 const getAllProperties = function(options, limit = 10) {
 
-  console.log(options);
+  console.log('options:', options)
 
   const queryParams = [];
 
@@ -121,51 +116,45 @@ const getAllProperties = function(options, limit = 10) {
   
   for (const option in options) {
 
-    if (options[option]) {
+    if (option === 'minimum_rating') {
 
-      if (option === 'minimum_rating') {
+      minRating = true;
 
-        minRating = true;
-
-      } else if (options !== 'minium_rating') {
-        if (queryParams.length === 0) {
+    } else if (options !== 'minium_rating') {
+      if (queryParams.length === 0) {
         queryString += 'WHERE';
-        } else if (options !== 'minium_rating' && queryParams.length !== 0) {
+      } else if (options !== 'minium_rating' && queryParams.length !== 0) {
         queryString += ' AND';
-        }
+      }
 
-        if  (option === 'city') {
-          queryParams.push(`%${options.city}%`);
-          queryString += ` city LIKE $${queryParams.length}`;
-        }
-        if (option === 'owner_id') {
-          queryParams.push(options.owner_id);
-          queryString += ` owner_id = $${queryParams.length}`;
-        }
-        if (option === 'minimum_price_per_night') {
-          queryParams.push(options.minimum_price_per_night * 100);
-          queryString += ` cost_per_night >= $${queryParams.length}`;
-        }
-        if (option === 'maximum_price_per_night') {
-          queryParams.push(options.maximum_price_per_night * 100);
-          queryString += ` cost_per_night <= $${queryParams.length}`;
-        }
+      if  (option === 'city') {
+        queryParams.push(`%${options.city}%`);
+        queryString += ` city LIKE $${queryParams.length}`;
+      }
+      if (option === 'owner_id') {
+        queryParams.push(options.owner_id);
+        queryString += ` owner_id = $${queryParams.length}`;
+      }
+      if (option === 'minimum_price_per_night') {
+        queryParams.push(options.minimum_price_per_night * 100);
+        queryString += ` cost_per_night >= $${queryParams.length}`;
+      }
+      if (option === 'maximum_price_per_night') {
+        queryParams.push(options.maximum_price_per_night * 100);
+        queryString += ` cost_per_night <= $${queryParams.length}`;
       }
     }
+
   }
 
-  
-  
   queryString += `
   GROUP BY properties.id
-  `
-  
+  `;
+
   if (minRating === true) {
-    console.log('adding HAVING')
     queryParams.push(options.minimum_rating);
     queryString += `HAVING avg(rating) >= $${queryParams.length}`;
   }
-  
   
   queryParams.push(limit);
   queryString += `
@@ -173,9 +162,12 @@ const getAllProperties = function(options, limit = 10) {
   LIMIT $${queryParams.length};
   `;
 
+  console.log(queryParams, queryString)
+
   return pool
     .query(queryString, queryParams)
     .then((result) => {
+      console.log(result.rows);
       return result.rows;
     })
     .catch((err) => {
