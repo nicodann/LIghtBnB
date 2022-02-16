@@ -107,25 +107,25 @@ const getAllProperties = function(options, limit = 10) {
   let queryString = `
   SELECT properties.*, avg(rating) AS average_rating
   FROM properties
-  JOIN property_reviews ON properties.id = property_reviews.property_id
+  LEFT JOIN property_reviews ON properties.id = property_reviews.property_id
   WHERE TRUE 
   `;
 
   if (options.city) {
     queryParams.push(`%${options.city}%`);
-    queryString += `AND city LIKE $${queryParams.length}`;
+    queryString += ` AND city LIKE $${queryParams.length}`;
   }
   if (options.owner_id) {
     queryParams.push(options.owner_id);
-    queryString += `AND owner_id = $${queryParams.length}`;
+    queryString += ` AND owner_id = $${queryParams.length}`;
   }
   if (options.minimum_price_per_night) {
     queryParams.push(options.minimum_price_per_night * 100);
-    queryString += `AND cost_per_night >= $${queryParams.length}`;
+    queryString += ` AND cost_per_night >= $${queryParams.length}`;
   }
   if (options.maximum_price_per_night) {
     queryParams.push(options.maximum_price_per_night * 100);
-    queryString += `AND cost_per_night <= $${queryParams.length}`;
+    queryString += ` AND cost_per_night <= $${queryParams.length}`;
   }
   
 
@@ -162,13 +162,11 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-
+ 
+  property.cost_per_night *= 100;
   const queryParams = [];
-
-  let values = '';
-
-  let queryString = `INSERT INTO properties (`;
-
+  let values = ''
+  let queryString = 'INSERT INTO properties ('
   for (const prop in property) {
     queryParams.push(property[prop]);
     if (queryParams.length === Object.keys(property).length) {
