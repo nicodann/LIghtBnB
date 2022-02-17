@@ -1,11 +1,13 @@
-const { Pool } = require('pg');
+// const { Pool } = require('pg');
 
-const pool = new Pool({
-  user: 'vagrant',
-  password: '123',
-  host: 'localhost',
-  database: 'lightbnb'
-});
+// const pool = new Pool({
+//   user: 'vagrant',
+//   password: '123',
+//   host: 'localhost',
+//   database: 'lightbnb'
+// });
+
+const db = require('../db/index.js')
 
 
 
@@ -17,7 +19,7 @@ const pool = new Pool({
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function(email) {
-  return pool
+  return db
     .query(`SELECT * FROM users WHERE users.email = $1;`, [email])
     .then((result) => {
       return result.rows[0];
@@ -34,7 +36,7 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return pool
+  return db
     .query(`SELECT * FROM users WHERE users.id = $1`, [id])
     .then((result) => {
       return result.rows[0];
@@ -52,7 +54,7 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser =  function(user) {
-  return pool
+  return db
     .query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.email, user.password])
     .then((result) => {
       return result.rows[0];
@@ -71,7 +73,7 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guestID, limit = 10) {
-  return pool
+  return db
     .query(`
       SELECT reservations.*, properties.*, avg(property_reviews.rating) AS average_rating
       FROM reservations
@@ -140,11 +142,11 @@ const getAllProperties = function(options, limit = 10) {
   
   queryParams.push(limit);
   queryString += `
-  ORDER BY cost_per_night
+  ORDER BY properties.id DESC
   LIMIT $${queryParams.length};
   `;
 
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((result) => {
       return result.rows;
@@ -178,7 +180,7 @@ const addProperty = function(property) {
     }
   }
 
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((result) => {
       return result.rows[0];
